@@ -8,12 +8,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   phone: { type: String, required: true },
   role: { type: String, enum: ['student', 'teacher'], required: true },
-  profilePicture: { type: String },
-  level: { 
-    type: String, 
-    enum: ['Elementary', 'A1', 'A2', 'B1'], 
-    required: function() { return this.role === 'student'; } 
-  },
+  profilePicture: { type: String }
 }, { timestamps: true });
 
 userSchema.pre('save', async function(next) {
