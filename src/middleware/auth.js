@@ -13,13 +13,16 @@ export const auth = async (req, res, next) => {
 
     req.token = token;
     req.user = user;
+    console.log('Usuario autenticado:', req.user);
     next();
   } catch (error) {
+    console.error('Error de autenticación:', error);
     res.status(401).send({ error: 'Please authenticate.' });
   }
 };
 
 export const teacherAuth = (req, res, next) => {
+  console.log('Rol del usuario:', req.user.role);
   if (req.user.role !== 'teacher') {
     return res.status(403).send({ error: 'Access denied. Teachers only.' });
   }

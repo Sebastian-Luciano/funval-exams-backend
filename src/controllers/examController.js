@@ -1,21 +1,52 @@
 import Exam from '../models/Exam.js';
 
-export const createExam = async (req, res) => {
+/* export const createExam = async (req, res) => {
   try {
     const { title, level, questions } = req.body;
+    console.log('Datos recibidos:', req.body);
+    // Validación
+    if (!title || !level || !timer || !questions || !Array.isArray(questions) || questions.length === 0) {
+      return res.status(400).json({ error: 'Datos de examen inválidos' });
+    }
 
-    // Validación de datos
-    if (!title || !level || !questions || !Array.isArray(questions) || questions.length === 0) {
-      return res.status(400).json({ error: 'Datos de examen inválidos. Se requiere título, nivel y al menos una pregunta.' });
+    // Validación adicional para cada pregunta
+    for (const question of questions) {
+      if (!question.question || !question.type || !question.correctAnswer) {
+        return res.status(400).json({ error: 'Datos de pregunta inválidos' });
+      }
     }
 
     const exam = new Exam({
       title,
       level,
+      timer,
       questions,
       creator: req.user._id
     });
     await exam.save();
+    res.status(201).json(exam);
+  } catch (error) {
+    console.error('Error al crear examen:', error);
+    res.status(400).json({ error: error.message });
+  }
+}; */
+
+export const createExam = async (req, res) => {
+  try {
+    const { title, level, timer, questions } = req.body;
+    console.log('Creando examen:', { title, level, timer, questions });
+
+    const exam = new Exam({
+      title,
+      level,
+      timer,
+      questions,
+      creator: req.user._id
+    });
+
+    await exam.save();
+    console.log('Examen creado:', exam);
+
     res.status(201).json(exam);
   } catch (error) {
     console.error('Error al crear examen:', error);
