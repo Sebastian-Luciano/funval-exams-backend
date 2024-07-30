@@ -1,5 +1,6 @@
 import Exam from '../models/Exam.js';
-
+import Question from '../models/Question.js';
+import User from '../models/User.js';
 /* export const createExam = async (req, res) => {
   try {
     const { title, level, questions } = req.body;
@@ -31,6 +32,42 @@ import Exam from '../models/Exam.js';
   }
 }; */
 
+/* export const createExam = async (req, res) => {
+  try {
+    const { title, level, timer, questions } = req.body;
+
+    const exam = new Exam({
+      title,
+      level,
+      timer,
+      creator: req.user._id
+    });
+
+    await exam.save();
+
+    const questionPromises = questions.map(async (questionData) => {
+      const question = new Question({
+        ...questionData,
+        exam: exam._id
+      });
+      await question.save();
+      return question._id;
+    });
+
+    const questionIds = await Promise.all(questionPromises);
+
+    exam.questions = questionIds;
+    await exam.save();
+
+    res.status(201).json(exam);
+  } catch (error) {
+    console.error('Error al crear examen:', error);
+    res.status(400).json({ error: error.message });
+  }
+};
+ */
+
+// src/controller/examController.js
 export const createExam = async (req, res) => {
   try {
     const { title, level, timer, questions } = req.body;
@@ -42,7 +79,7 @@ export const createExam = async (req, res) => {
       questions,
       creator: req.user._id
     });
-
+    console.log('Exam to be saved:', JSON.stringify(exam, null, 2));
     await exam.save();
 
     res.status(201).json(exam);
@@ -52,6 +89,7 @@ export const createExam = async (req, res) => {
   }
 };
 
+
 export const getExamsForStudent = async (req, res) => {
   try {
     const student = await User.findById(req.user._id).populate('currentLevel');
@@ -59,7 +97,7 @@ export const getExamsForStudent = async (req, res) => {
       return res.status(404).json({ error: 'Student or level not found' });
     }
 
-    const exams = await Exam.find({ level: student.currentLevel._id });
+    const exams = await Exam.find({ level: student.currentLevel._id }).populate('questions');
     res.json(exams);
   } catch (error) {
     res.status(500).json({ error: error.message });

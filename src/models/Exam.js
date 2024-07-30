@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+
 
 /* const questionSchema = new mongoose.Schema({
   question: { type: String, required: true },
@@ -6,12 +6,12 @@ import mongoose from 'mongoose';
   correctAnswer: { type: String, required: true },
 }); */
 
-const questionSchema = new mongoose.Schema({
+/* const questionSchema = new mongoose.Schema({
   question: { type: String, required: true },
   type: { type: String, enum: ['simple', 'multiple', 'video'], required: true },
   options: [{ type: String }],
   correctAnswer: { type: String, required: true },
-});
+}); */
 
 /* const examSchema = new mongoose.Schema({
   title: { type: String, required: true },
@@ -29,15 +29,27 @@ const examSchema = new mongoose.Schema({
 
 export default mongoose.model('Exam', examSchema); */
 
-
-
+/* 
 const examSchema = new mongoose.Schema({
   title: { type: String, required: true },
   level: { type: mongoose.Schema.Types.ObjectId, ref: 'Level', required: true },
   timer: { type: Number },
+  questions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }],
+  creator: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+}, { timestamps: true });
+
+export default mongoose.model('Exam', examSchema);
+ */
+
+// src/models/Exam.js
+import mongoose from 'mongoose';
+
+const examSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  level: { type: mongoose.Schema.Types.ObjectId, ref: 'Level', required: true },
   questions: [{
-    type: { type: String, enum: ['simple', 'multiple', 'video'], required: true },
     question: { type: String, required: true },
+    type: { type: String, enum: ['simple', 'multiple', 'video'], required: true },
     options: [{ type: String }],
     correctAnswer: { type: String }
   }],
@@ -45,3 +57,15 @@ const examSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 export default mongoose.model('Exam', examSchema);
+
+
+/* 
+const examSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  level: { type: mongoose.Schema.Types.ObjectId, ref: 'Level', required: true },
+  timer: { type: Number },
+  questions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }],
+  creator: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+}, { timestamps: true });
+
+export default mongoose.model('Exam', examSchema); */
