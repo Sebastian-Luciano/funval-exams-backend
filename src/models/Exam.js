@@ -19,12 +19,29 @@ const questionSchema = new mongoose.Schema({
   questions: [questionSchema],
   creator: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 }, { timestamps: true }); */
-
+/* 
 const examSchema = new mongoose.Schema({
   title: { type: String, required: true },
   level: { type: String, required: true },
   timer: { type: Number }, // tiempo en minutos
   questions: [questionSchema],
+}, { timestamps: true });
+
+export default mongoose.model('Exam', examSchema); */
+
+
+
+const examSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  level: { type: mongoose.Schema.Types.ObjectId, ref: 'Level', required: true },
+  timer: { type: Number },
+  questions: [{
+    type: { type: String, enum: ['simple', 'multiple', 'video'], required: true },
+    question: { type: String, required: true },
+    options: [{ type: String }],
+    correctAnswer: { type: String }
+  }],
+  creator: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 }, { timestamps: true });
 
 export default mongoose.model('Exam', examSchema);

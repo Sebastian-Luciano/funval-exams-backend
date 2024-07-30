@@ -64,6 +64,7 @@ export const assignLevel = async (req, res) => {
         currentLevel: level.name
       }
     });
+    console.log('Level assigned:', student);
   } catch (error) {
     console.error('Error in assignLevel:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -79,7 +80,7 @@ export const assignLevel = async (req, res) => {
   }
 }; */
 
-export const getStudents = async (req, res) => {
+/* export const getStudents = async (req, res) => {
   try {
     const students = await User.find({ role: 'student' }).select('-password');
     const studentsWithLevels = await Promise.all(students.map(async (user) => {
@@ -90,6 +91,41 @@ export const getStudents = async (req, res) => {
       };
     }));
     res.status(200).json(studentsWithLevels);
+  } catch (error) {
+    console.error('Error in getStudents:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}; */
+
+/* export const getStudents = async (req, res) => {
+  try {
+    const students = await User.find({ role: 'student' }).select('-password');
+    const studentsWithLevels = await Promise.all(students.map(async (user) => {
+      const studentDoc = await Student.findOne({ userId: user._id }).populate('currentLevel');
+      return {
+        ...user.toObject(),
+        currentLevel: studentDoc?.currentLevel?.name || 'No asignado'
+      };
+    }));
+    res.status(200).json(studentsWithLevels);
+  } catch (error) {
+    console.error('Error in getStudents:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}; */
+
+export const getStudents = async (req, res) => {
+  try {
+    const students = await User.find({ role: 'student' }).select('-password');
+    const studentsWithLevels = await Promise.all(students.map(async (user) => {
+      const studentDoc = await Student.findOne({ userId: user._id }).populate('currentLevel');
+      return {
+        ...user.toObject(),
+        currentLevel: studentDoc?.currentLevel?.name
+      };
+    }));
+    res.status(200).json(studentsWithLevels);
+    console.log('Students fetched:', studentsWithLevels);
   } catch (error) {
     console.error('Error in getStudents:', error);
     res.status(500).json({ error: 'Internal server error' });

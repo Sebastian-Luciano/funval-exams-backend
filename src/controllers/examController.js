@@ -34,7 +34,6 @@ import Exam from '../models/Exam.js';
 export const createExam = async (req, res) => {
   try {
     const { title, level, timer, questions } = req.body;
-    console.log('Creando examen:', { title, level, timer, questions });
 
     const exam = new Exam({
       title,
@@ -45,7 +44,6 @@ export const createExam = async (req, res) => {
     });
 
     await exam.save();
-    console.log('Examen creado:', exam);
 
     res.status(201).json(exam);
   } catch (error) {
@@ -53,6 +51,21 @@ export const createExam = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+export const getExamsForStudent = async (req, res) => {
+  try {
+    const student = await User.findById(req.user._id).populate('currentLevel');
+    if (!student || !student.currentLevel) {
+      return res.status(404).json({ error: 'Student or level not found' });
+    }
+
+    const exams = await Exam.find({ level: student.currentLevel._id });
+    res.json(exams);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 export const getExams = async (req, res) => {
   try {

@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/exams', auth, studentAuth, getExamsByLevel);
 router.post('/submit-exam/:examId', auth, studentAuth, submitExam);
 router.post('/assign-level', auth, teacherAuth, assignLevel);
-router.get('/', auth, getStudents);
+router.get('/', auth, teacherAuth, getStudents);
 router.post('/', createStudent);
 router.get('/grades', auth, studentAuth, getStudentGrades);
 
