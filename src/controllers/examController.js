@@ -1,5 +1,6 @@
 import Exam from '../models/Exam.js';
 import Question from '../models/Question.js';
+import mongoose from 'mongoose';
 import User from '../models/User.js';
 /* export const createExam = async (req, res) => {
   try {
@@ -126,7 +127,7 @@ export const getExam = async (req, res) => {
   }
 };
 
-export const updateExam = async (req, res) => {
+/* export const updateExam = async (req, res) => {
   try {
     const { title, level, questions } = req.body;
     const exam = await Exam.findOneAndUpdate(
@@ -141,7 +142,69 @@ export const updateExam = async (req, res) => {
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
+}; */
+
+/* export const updateExam = async (req, res) => {
+  try {
+    const { title, level, timer, questions } = req.body;
+    
+    // Asegúrate de que level sea un ObjectId válido
+    if (!mongoose.Types.ObjectId.isValid(level)) {
+      return res.status(400).json({ error: 'Invalid level ID' });
+    }
+
+    const updatedExam = await Exam.findOneAndUpdate(
+      { _id: req.params.id, creator: req.user._id },
+      {
+        title,
+        level,
+        timer,
+        questions,
+        creator: req.user._id
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedExam) {
+      return res.status(404).json({ error: 'Exam not found' });
+    }
+
+    res.json(updatedExam);
+  } catch (error) {
+    console.error('Error updating exam:', error);
+    res.status(400).json({ error: error.message });
+  }
+}; */
+
+export const updateExam = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    console.log('ID del examen a actualizar:', id);
+    console.log('Datos de actualización recibidos:', updates);
+
+    const updatedExam = await Exam.findByIdAndUpdate(
+      id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedExam) {
+      return res.status(404).json({ message: 'Examen no encontrado' });
+    }
+
+    console.log('Examen después de actualizar:', updatedExam);
+
+    res.json(updatedExam);
+  } catch (error) {
+    console.error('Error detallado al actualizar el examen:', error);
+    console.error('Stack trace:', error.stack);
+    res.status(500).json({ message: 'Error al actualizar el examen', error: error.message });
+
+  }
 };
+
 
 export const deleteExam = async (req, res) => {
   try {

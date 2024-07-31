@@ -1,26 +1,3 @@
-/* import mongoose from 'mongoose';
-
-const questionSchema = new mongoose.Schema({
-  type: {
-    type: String,
-    enum: ['simple', 'multiple', 'video'],
-    required: true
-  },
-  question: {
-    type: String,
-    required: true
-  },
-  options: [{
-    type: String
-  }],
-  correctAnswer: {
-    type: String
-  }
-});
-
-export default mongoose.model('Question', questionSchema); */
-
-// src/models/Question.js
 import mongoose from 'mongoose';
 
 const questionSchema = new mongoose.Schema({
