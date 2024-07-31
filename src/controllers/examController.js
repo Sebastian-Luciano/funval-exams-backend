@@ -106,12 +106,21 @@ export const getExamsForStudent = async (req, res) => {
 };
 
 
-export const getExams = async (req, res) => {
+/* export const getExams = async (req, res) => {
   try {
     const exams = await Exam.find({ creator: req.user._id });
     res.json(exams);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+}; */
+
+export const getExams = async (req, res) => {
+  try {
+    const exams = await Exam.find().populate('level');
+    res.json(exams);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener los exámenes' });
   }
 };
 
@@ -215,5 +224,15 @@ export const deleteExam = async (req, res) => {
     res.json({ message: 'Exam deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+
+export const getStudentExams = async (req, res) => {
+  try {
+    const exams = await Exam.find().populate('level');
+    res.json(exams);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener los exámenes' });
   }
 };
