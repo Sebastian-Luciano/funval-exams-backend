@@ -1,13 +1,49 @@
 import Exam from '../models/Exam.js';
 import Grade from '../models/Grade.js';
 import User from '../models/User.js';
+import Student from '../models/Student.js';
+
+/* export const getExamsByLevel = async (req, res) => {
+  try {
+    console.log('Usuario autenticado:', req.user);
+
+    const student = await Student.findOne({ userId: req.user._id }).populate('currentLevel');
+    console.log('Estudiante encontrado:', student);
+
+    if (!student || !student.currentLevel) {
+      return res.status(404).json({ error: 'Estudiante o nivel no encontrado' });
+    }
+
+    const exams = await Exam.find({ level: student.currentLevel._id });
+    console.log('Exámenes encontrados:', exams);
+
+    res.json(exams);
+  } catch (error) {
+    console.error('Error en getExamsByLevel:', error);
+    res.status(500).json({ error: 'Error interno del servidor', details: error.message });
+  }
+}; */
 
 export const getExamsByLevel = async (req, res) => {
   try {
-    const exams = await Exam.find({ level: req.user.level });
-    res.status(200).json(exams);
+    console.log('Usuario autenticado:', req.user);
+
+    const student = await Student.findOne({ userId: req.user._id }).populate('currentLevel');
+    console.log('Estudiante encontrado:', student);
+
+    if (!student || !student.currentLevel) {
+      console.log('Estudiante o nivel no encontrado');
+      return res.status(404).json({ error: 'Estudiante o nivel no encontrado' });
+    }
+
+    console.log('Buscando exámenes para el nivel:', student.currentLevel._id);
+    const exams = await Exam.find({ level: student.currentLevel._id });
+    console.log('Exámenes encontrados:', exams);
+
+    res.json(exams);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error detallado en getExamsByLevel:', error);
+    res.status(500).json({ error: 'Error interno del servidor', details: error.message });
   }
 };
 
