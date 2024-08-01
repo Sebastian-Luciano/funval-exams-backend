@@ -1,28 +1,8 @@
 import Exam from '../models/Exam.js';
 import Grade from '../models/Grade.js';
-import User from '../models/User.js';
 import Student from '../models/Student.js';
 
-/* export const getExamsByLevel = async (req, res) => {
-  try {
-    console.log('Usuario autenticado:', req.user);
 
-    const student = await Student.findOne({ userId: req.user._id }).populate('currentLevel');
-    console.log('Estudiante encontrado:', student);
-
-    if (!student || !student.currentLevel) {
-      return res.status(404).json({ error: 'Estudiante o nivel no encontrado' });
-    }
-
-    const exams = await Exam.find({ level: student.currentLevel._id });
-    console.log('Exámenes encontrados:', exams);
-
-    res.json(exams);
-  } catch (error) {
-    console.error('Error en getExamsByLevel:', error);
-    res.status(500).json({ error: 'Error interno del servidor', details: error.message });
-  }
-}; */
 
 export const getExamsByLevel = async (req, res) => {
   try {
@@ -47,43 +27,65 @@ export const getExamsByLevel = async (req, res) => {
   }
 };
 
+
+
 export const submitExam = async (req, res) => {
   try {
     const { examId } = req.params;
-    const { answers, videoUrl } = req.body;
+    const { answers } = req.body;
+    const studentId = req.user._id;
     
+
     const exam = await Exam.findById(examId);
     if (!exam) {
       return res.status(404).json({ error: 'Examen no encontrado' });
     }
 
-    const score = calculateScore(answers, exam.questions);
+     // Verificar si ya existe una calificación para este estudiante y examen
+     let existingGrade = await Grade.findOne({ student: studentId, exam: examId });
     
+     if (existingGrade) {
+       return res.status(400).json({ error: 'Ya has realizado este examen' });
+     }
+
+    let score = 0;
+    exam.questions.forEach((question) => {
+      const studentAnswer = answers[question._id.toString()];
+      if (studentAnswer && question.correctAnswer.toLowerCase() === studentAnswer.toLowerCase()) {
+        score++;
+      }
+    });
+    const finalScore = (score / exam.questions.length) * 100;
+
     const grade = new Grade({
-      student: req.user._id,
+      student: studentId,
       exam: examId,
-      score,
-      videoUrl,
+      score: finalScore,
       answers
     });
-    
     await grade.save();
 
     // Actualizar el nivel del estudiante si es necesario
-    await updateStudentLevel(req.user._id, score, exam.level);
-
+    await updateStudentLevel(studentId, finalScore, exam.level);
+    
     res.status(200).json({ message: 'Examen enviado con éxito', grade });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error al enviar el examen:', error);
+    res.status(500).json({ error: 'Error interno del servidor', details: error.message });
   }
 };
 
 export const getStudentGrades = async (req, res) => {
   try {
     const grades = await Grade.find({ student: req.user._id }).populate('exam');
-    res.status(200).json(grades);
+    const average = grades.length > 0 
+      ? grades.reduce((acc, grade) => acc + grade.score, 0) / grades.length 
+      : 0;
+    
+    res.status(200).json({ grades, average });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error al obtener calificaciones:', error);
+    res.status(500).json({ error: 'Error interno del servidor', details: error.message });
   }
 };
 
@@ -97,13 +99,23 @@ function calculateScore(studentAnswers, examQuestions) {
   return (score / examQuestions.length) * 100;
 }
 
-async function updateStudentLevel(studentId, score, examLevel) {
-  const levelOrder = ['Elementary', 'A1', 'A2', 'B1'];
-  if (score >= 80) {
-    const currentLevelIndex = levelOrder.indexOf(examLevel);
-    if (currentLevelIndex < levelOrder.length - 1) {
-      const newLevel = levelOrder[currentLevelIndex + 1];
-      await User.findByIdAndUpdate(studentId, { level: newLevel });
+
+  async function updateStudentLevel(studentId, score, examLevel) {
+    try {
+      const student = await Student.findOne({ userId: studentId }).populate('currentLevel');
+      if (!student) return;
+  
+      if (score >= 80 && examLevel) {
+        if (student.currentLevel._id.toString() !== examLevel._id.toString()) {
+          student.currentLevel = examLevel;
+          student.history.push({
+            level: examLevel,
+            assignedAt: new Date()
+          });
+          await student.save();
+        }
+      }
+    } catch (error) {
+      console.error('Error al actualizar el nivel del estudiante:', error);
     }
   }
-}
