@@ -1,6 +1,7 @@
 import Exam from '../models/Exam.js';
 import Grade from '../models/Grade.js';
 import Student from '../models/Student.js';
+import User from '../models/User.js';
 
 
 
@@ -119,3 +120,31 @@ function calculateScore(studentAnswers, examQuestions) {
       console.error('Error al actualizar el nivel del estudiante:', error);
     }
   }
+
+  export const getAllStudentGrades = async (req, res) => {
+    try {
+      const students = await User.find({ role: 'student' }).select('name lastName');
+      const gradesPromises = students.map(async (student) => {
+        const grades = await Grade.find({ student: student._id }).populate('exam', 'title');
+        const average = grades.length > 0 
+          ? grades.reduce((acc, grade) => acc + grade.score, 0) / grades.length 
+          : 0;
+        return {
+          _id: student._id,
+          name: student.name,
+          lastName: student.lastName,
+          level: student.level, // Asumiendo que el nivel está en el modelo de Usuario
+          grades: grades.map(g => ({ 
+            examTitle: g.exam ? g.exam.title : 'N/A', 
+            score: g.score 
+          })),
+          average: parseFloat(average.toFixed(2))
+        };
+      });
+      const studentsWithGrades = await Promise.all(gradesPromises);
+      res.json(studentsWithGrades);
+    } catch (error) {
+      console.error('Error in getAllStudentGrades:', error);
+      res.status(500).json({ error: error.message });
+    }
+  };

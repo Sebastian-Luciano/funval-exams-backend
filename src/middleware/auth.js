@@ -51,7 +51,9 @@ export const teacherAuth = (req, res, next) => {
     res.status(500).json({ error: 'Error en la autenticación de estudiante' });
   }
 }; */
-export const studentAuth = async (req, res, next) => {
+
+/* export const studentAuth = async (req, res, next) => {
+
   try {
     console.log('Verificando estudiante para usuario:', req.user._id);
     const student = await Student.findOne({ userId: req.user._id });
@@ -61,6 +63,20 @@ export const studentAuth = async (req, res, next) => {
     }
     console.log('Estudiante encontrado:', student);
     req.student = student;
+    next();
+  } catch (error) {
+    console.error('Error en middleware studentAuth:', error);
+    res.status(500).json({ error: 'Error en la autenticación de estudiante' });
+  }
+};
+ */
+
+
+export const studentAuth = async (req, res, next) => {
+  try {
+    if (req.user.role !== 'student') {
+      return res.status(403).json({ error: 'Acceso denegado. Solo para estudiantes.' });
+    }
     next();
   } catch (error) {
     console.error('Error en middleware studentAuth:', error);

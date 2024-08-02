@@ -1,6 +1,7 @@
 import Student from '../models/Student.js';
 import Level from '../models/Level.js';
 import User from '../models/User.js';
+import Grade from '../models/Grade.js';
 
 /* export const assignLevel = async (req, res) => {
   try {
@@ -161,5 +162,31 @@ export const assignLevelToStudent = async (req, res) => {
     res.status(200).json({ message: 'Level assigned successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error assigning level' });
+  }
+};
+
+export const getStudentGrades = async (req, res) => {
+  try {
+    const students = await User.find({ role: 'student' }).select('name lastName');
+    const gradesPromises = students.map(async (student) => {
+      const grades = await Grade.find({ student: student._id }).populate('exam', 'title');
+      const examScores = grades.map(g => g.score);
+      const average = examScores.length > 0 
+        ? examScores.reduce((acc, score) => acc + score, 0) / examScores.length 
+        : 0;
+      return {
+        _id: student._id,
+        name: student.name,
+        lastName: student.lastName,
+        examScores: examScores,
+        average: average.toFixed(2),
+        passed: average >= 80 // Asumiendo que 0 es la nota de aprobación
+      };
+    });
+    const studentsWithGrades = await Promise.all(gradesPromises);
+    res.json(studentsWithGrades);
+  } catch (error) {
+    console.error('Error in getStudentGrades:', error);
+    res.status(500).json({ error: error.message });
   }
 };
